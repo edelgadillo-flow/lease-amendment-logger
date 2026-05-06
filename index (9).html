@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lease Amendment Logger — Flow Properties</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Schoolbell&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#f5efe0;--cream-dark:#ede4cf;--cream-border:#d9cdb5;
+  --text-dark:#2a2520;--text-mid:#6b6358;--text-light:#aaa098;
+  --orange:#f0882a;--orange-light:#faebd7;
+  --pink:#f04e7c;--pink-light:#ffe8f0;--pink-border:#ffb3cc;
+  --blue:#4a90d9;--blue-light:#e8f2ff;
+  --green:#4caf7d;--green-light:#e6f7ee;--green-border:#a8ddc0;
+  --yellow:#f5c842;--yellow-light:#fffbe6;
+  --purple:#9b6dd6;--purple-light:#f2ebff;
+  --card-bg:#fdf6eb;
+  --font-doodle:'Schoolbell',cursive;
+  --font-body:'Nunito',sans-serif;
+}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);min-height:100vh;font-size:14px;background-image:radial-gradient(circle,#c9b99a 1px,transparent 1px);background-size:28px 28px}
+
+/* ── Header ── */
+.app-header{background:var(--cream);border-bottom:3px solid var(--text-dark);padding:0 28px 0;position:sticky;top:0;z-index:100;overflow:hidden}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0 6px;position:relative;z-index:2}
+.app-title{font-family:var(--font-doodle);font-size:30px;color:var(--text-dark);line-height:1;display:flex;align-items:center;gap:10px}
+.title-word-pink{color:var(--pink)}
+.title-word-orange{color:var(--orange)}
+.doodle-heart{display:inline-block;font-size:22px;transform:rotate(-8deg);animation:wobble 3s ease-in-out infinite}
+@keyframes wobble{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+
+.live-badge{background:var(--green-light);color:#1e7a40;border:2.5px solid var(--green);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;font-family:var(--font-doodle);letter-spacing:0.5px;transform:rotate(1deg)}
+
+/* ── Doodle wave SVG under header ── */
+.wave-strip{width:100%;height:32px;display:block;margin-top:2px}
+
+/* ── Nav ── */
+.nav-tabs{background:var(--cream);border-bottom:2.5px solid var(--text-dark);padding:0 28px;display:flex;position:sticky;top:105px;z-index:99}
+.nav-tab{padding:10px 20px;font-size:14px;font-weight:700;color:var(--text-mid);cursor:pointer;border-bottom:3px solid transparent;border-top:none;border-left:none;border-right:none;background:none;font-family:var(--font-doodle);display:flex;align-items:center;gap:6px;transition:all 0.15s;letter-spacing:0.3px}
+.nav-tab:hover{color:var(--text-dark)}
+.nav-tab.active{color:var(--pink);border-bottom:3px solid var(--pink)}
+
+/* ── Layout ── */
+.content{padding:28px;max-width:860px;margin:0 auto}
+.view{display:none}.view.active{display:block}
+
+/* ── Cards — wobbly doodle border ── */
+.card{background:var(--card-bg);border:2.5px solid var(--text-dark);border-radius:16px;padding:22px 24px;margin-bottom:18px;position:relative;box-shadow:4px 4px 0 var(--text-dark)}
+.card::before{content:'';position:absolute;inset:-1px;border-radius:17px;border:1.5px solid rgba(0,0,0,0.06);pointer-events:none}
+.card-pink{border-color:var(--pink);box-shadow:4px 4px 0 var(--pink)}
+.card-blue{border-color:var(--blue);box-shadow:4px 4px 0 var(--blue)}
+
+.section-label{display:flex;align-items:center;gap:8px;font-family:var(--font-doodle);font-size:16px;color:var(--text-dark);margin-bottom:16px}
+.section-icon{font-size:18px}
+
+/* ── Form ── */
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field-label{font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.5px;font-family:var(--font-body)}
+.field-input{padding:9px 12px;background:var(--cream-dark);border:2px solid var(--text-dark);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--text-dark);outline:none;transition:border-color 0.15s,box-shadow 0.15s;width:100%}
+.field-input:focus{border-color:var(--pink);box-shadow:3px 3px 0 var(--pink)}
+.field-select{padding:9px 12px;background:var(--cream-dark);border:2px solid var(--text-dark);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--text-dark);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%232a2520' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;width:100%}
+.field-select:focus{border-color:var(--pink);box-shadow:3px 3px 0 var(--pink)}
+
+/* ── Change toggles ── */
+.toggle-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.change-toggle{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--cream-dark);border:2px solid var(--text-dark);border-radius:20px;cursor:pointer;font-size:13px;font-weight:700;font-family:var(--font-doodle);color:var(--text-mid);transition:all 0.15s;user-select:none}
+.change-toggle:hover{border-color:var(--pink);color:var(--pink)}
+.change-toggle.active{background:var(--pink-light);border-color:var(--pink);color:var(--pink);box-shadow:3px 3px 0 var(--pink)}
+.change-toggle input{display:none}
+.toggle-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* ── Change fields ── */
+.change-fields-area{display:flex;flex-direction:column;gap:10px}
+.change-row{display:grid;grid-template-columns:130px 1fr 28px 1fr;align-items:center;gap:8px}
+.change-label-text{font-size:12px;font-weight:700;color:var(--text-mid);font-family:var(--font-doodle);font-size:14px}
+.arrow-cell{text-align:center;color:var(--pink);font-size:20px;font-weight:700}
+.change-input{padding:8px 10px;background:var(--cream-dark);border:2px solid var(--cream-border);border-radius:8px;font-family:var(--font-body);font-size:12px;color:var(--text-dark);outline:none;transition:all 0.15s;width:100%}
+.change-input:focus{border-color:var(--pink);box-shadow:2px 2px 0 var(--pink)}
+.empty-hint{font-size:13px;color:var(--text-light);font-family:var(--font-doodle);padding:8px 0}
+
+/* ── Buttons ── */
+.btn-primary{padding:10px 26px;background:var(--pink);color:white;border:2.5px solid var(--text-dark);border-radius:12px;font-family:var(--font-doodle);font-size:16px;cursor:pointer;transition:all 0.15s;box-shadow:4px 4px 0 var(--text-dark)}
+.btn-primary:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--text-dark)}
+.btn-primary:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--text-dark)}
+.btn-primary:disabled{background:var(--cream-border);color:var(--text-light);cursor:not-allowed;box-shadow:2px 2px 0 var(--cream-border)}
+.btn-secondary{padding:10px 20px;background:var(--cream-dark);color:var(--text-dark);border:2.5px solid var(--text-dark);border-radius:12px;font-family:var(--font-doodle);font-size:15px;cursor:pointer;transition:all 0.15s;box-shadow:3px 3px 0 var(--text-dark)}
+.btn-secondary:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--text-dark)}
+
+/* ── Doodle decorations ── */
+.doodle-star{display:inline-block;color:var(--yellow);font-size:20px;transform:rotate(15deg)}
+.doodle-sparkle{display:inline-block;color:var(--blue);font-size:16px;transform:rotate(-10deg)}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:28px;right:28px;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;font-family:var(--font-doodle);z-index:1000;transform:translateY(80px);opacity:0;transition:all 0.3s;pointer-events:none;border:2.5px solid var(--text-dark);box-shadow:4px 4px 0 var(--text-dark)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-success{background:var(--green-light);color:#1a6e35}
+.toast-error{background:var(--pink-light);color:#a02040}
+
+/* ── Property pills ── */
+.prop-pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;border:2px solid currentColor;font-family:var(--font-doodle)}
+.prop-brickell{background:var(--blue-light);color:#1a4fa0}
+.prop-west{background:var(--green-light);color:#1a6e35}
+.prop-east{background:var(--pink-light);color:#8a1f3a}
+.prop-ftl{background:var(--orange-light);color:#8a3e0e}
+.prop-wynwood{background:var(--purple-light);color:#4e1e8a}
+
+/* ── History table ── */
+.table-wrap{background:var(--card-bg);border:2.5px solid var(--text-dark);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--text-dark)}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--yellow-light);padding:10px 16px;text-align:left;font-size:12px;font-weight:700;font-family:var(--font-doodle);color:var(--text-dark);border-bottom:2px solid var(--text-dark)}
+tbody tr{border-bottom:1.5px solid var(--cream-border);cursor:pointer;transition:background 0.1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--yellow-light)}
+tbody tr.selected-row{background:var(--pink-light)}
+tbody td{padding:11px 16px;font-size:13px;vertical-align:middle}
+.td-muted{color:var(--text-mid);font-size:12px}
+.empty-table{padding:60px;text-align:center;color:var(--text-light);font-size:16px;font-family:var(--font-doodle)}
+
+/* ── Accordion ── */
+.accordion-row{background:var(--pink-light)!important;cursor:default!important}
+.accordion-row:hover{background:var(--pink-light)!important}
+.accordion-row td{padding:0!important;border-left:4px solid var(--pink)}
+.accordion-inner{padding:16px 20px}
+.log-entry-name{font-family:var(--font-doodle);font-size:18px;color:var(--text-dark)}
+.log-change-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;border-bottom:1px dashed var(--cream-border)}
+.log-change-row:last-child{border-bottom:none}
+.log-change-label{font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.4px;min-width:90px}
+.log-before{color:var(--text-mid);text-decoration:line-through}
+.log-arrow{color:var(--pink);margin:0 2px;font-weight:700;font-size:14px}
+.log-after{color:var(--text-dark);font-weight:700}
+.log-notes-line{font-size:12px;color:var(--text-mid);font-style:italic;margin-top:6px;padding-top:6px;border-top:1px dashed var(--cream-border)}
+.log-new-lease{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;font-family:var(--font-doodle);background:var(--green-light);color:#1a6e35;border:2px solid var(--green);border-radius:10px;padding:3px 10px;margin-top:6px}
+
+/* ── AI paste box ── */
+.ai-card{background:var(--yellow-light);border:2.5px solid var(--text-dark);border-radius:16px;padding:22px 24px;margin-bottom:18px;box-shadow:4px 4px 0 var(--text-dark)}
+.ai-paste-box{width:100%;min-height:90px;padding:11px 13px;background:white;border:2px dashed var(--text-dark);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--text-dark);outline:none;resize:vertical;transition:border-color 0.15s}
+.ai-paste-box:focus{border-color:var(--pink);border-style:solid}
+.ai-paste-box::placeholder{color:var(--text-light)}
+.ai-status{font-size:12px;font-family:var(--font-doodle);color:var(--text-mid);min-height:18px;margin-top:6px}
+.ai-status.loading{color:var(--orange)}
+.ai-status.done{color:var(--green)}
+.ai-status.err{color:var(--pink)}
+
+/* ── Floating doodles ── */
+.float-doodle{position:fixed;pointer-events:none;opacity:0.18;font-size:28px;z-index:0}
+.fd1{top:15%;right:3%;transform:rotate(20deg)}
+.fd2{top:40%;right:2%;transform:rotate(-15deg)}
+.fd3{bottom:30%;right:4%;transform:rotate(25deg)}
+.fd4{top:20%;left:1%;transform:rotate(-20deg)}
+.fd5{bottom:20%;left:2%;transform:rotate(10deg)}
+
+@media(max-width:600px){.row-2{grid-template-columns:1fr}.change-row{grid-template-columns:90px 1fr 18px 1fr;gap:5px}.float-doodle{display:none}}
+</style>
+</head>
+<body>
+
+<!-- floating doodles -->
+<div class="float-doodle fd1">⭐</div>
+<div class="float-doodle fd2">💗</div>
+<div class="float-doodle fd3">✨</div>
+<div class="float-doodle fd4">🌸</div>
+<div class="float-doodle fd5">⭐</div>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="app-title">
+      <svg width="52" height="28" viewBox="0 0 52 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;margin-right:4px">
+        <path d="M4,20 C4,14 8,8 14,8 C18,8 20,11 20,14 C20,18 17,20 14,20 C11,20 10,18 12,16" stroke="#e8547a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M20,14 C22,8 28,5 32,10 C34,13 33,17 30,18 C28,19 26,17 28,15" stroke="#e8547a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M28,15 C30,11 36,9 40,13 C42,16 41,20 38,21" stroke="#e8547a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M38,21 L48,19" stroke="#e8547a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M1,22 L10,22" stroke="#e8547a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      </svg>
+      lease <span class="title-word-pink">&nbsp;amendment&nbsp;</span> <span class="title-word-orange">logger</span>
+    </div>
+    <div class="live-badge">✦ Flow ✦</div>
+  </div>
+  <!-- hand-drawn wobbly wave -->
+  <svg class="wave-strip" viewBox="0 0 1000 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,16 C10,5 18,27 32,18 C46,9 52,4 68,16 C84,28 88,29 104,17 C120,5 126,3 143,15 C160,27 163,28 179,16 C195,4 200,3 217,15 C234,27 237,28 253,16 C269,4 274,2 291,14 C308,26 311,28 327,16 C343,4 348,2 365,14 C382,26 385,28 401,16 C417,4 422,2 439,14 C456,26 459,28 475,16 C491,4 496,2 513,14 C530,26 533,28 549,16 C565,4 570,2 587,14 C604,26 607,28 623,16 C639,4 644,2 661,14 C678,26 681,28 697,16 C713,4 718,2 735,14 C752,26 755,28 771,16 C787,4 792,2 809,14 C826,26 840,24 870,16 C900,8 940,20 1000,14" fill="none" stroke="#f04e7c" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M0,24 C14,14 22,28 38,20 C54,12 58,8 75,20 C92,32 96,30 112,20 C128,10 133,7 150,19 C167,31 170,29 186,19 C202,9 207,7 224,19 C241,31 244,29 260,19 C276,9 281,7 298,19 C315,31 318,29 334,19 C350,9 355,7 372,19 C389,31 392,29 408,19 C424,9 429,7 446,19 C463,31 466,29 482,19 C498,9 503,7 520,19 C537,31 540,29 556,19 C572,9 577,7 594,19 C611,31 614,29 630,19 C646,9 651,7 668,19 C685,31 688,29 704,19 C720,9 725,7 742,19 C759,31 762,29 778,19 C794,9 808,12 840,18 C872,24 920,16 1000,20" fill="none" stroke="#f5c842" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+  </svg>
+</header>
+
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="showView('log')" id="tab-log">
+    ✏️ Log Amendment
+  </button>
+  <button class="nav-tab" onclick="showView('history')" id="tab-history">
+    📋 History
+  </button>
+</nav>
+
+<div class="content">
+
+  <div class="view active" id="view-log">
+
+    <!-- ✨ AI Auto-fill -->
+    <div class="ai-card">
+      <div class="section-label"><span class="section-icon">✨</span> Auto-fill from message <span style="font-size:12px;color:var(--text-mid);font-family:var(--font-body);font-weight:400;margin-left:4px">paste a Slack, email, or note</span></div>
+      <textarea class="ai-paste-box" id="ai-paste" placeholder="Paste anything here — e.g. &quot;Hey can you update Romeo Anthony's unit from 1204 to 1506, move-in stays Oct 1, Flow Brickell&quot;"></textarea>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="autoFill()" id="ai-btn" style="background:var(--orange);font-size:14px;padding:8px 20px">✨ Auto-fill</button>
+        <button class="btn-secondary" onclick="clearPaste()" style="font-size:13px;padding:7px 16px">Clear</button>
+        <span class="ai-status" id="ai-status"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label"><span class="section-icon">🏠</span> Applicant & Property</div>
+      <div class="row-2" style="margin-bottom:14px">
+        <div class="field">
+          <label class="field-label">Property</label>
+          <select class="field-select" id="f-property">
+            <option value="">Select property...</option>
+            <option>Flow Brickell</option>
+            <option>Flow Miami West</option>
+            <option>Flow Miami East</option>
+            <option>Flow Fort Lauderdale</option>
+            <option>Flow Wynwood</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Logged by</label>
+          <input class="field-input" type="text" id="f-logger" placeholder="Your name" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Applicant name</label>
+        <input class="field-input" type="text" id="f-applicant" placeholder="Full name" />
+      </div>
+    </div>
+
+    <div class="card card-pink">
+      <div class="section-label"><span class="section-icon">🖊️</span> What changed? <span style="font-size:12px;color:var(--text-light);font-family:var(--font-body);font-weight:400;margin-left:4px">pick all that apply</span></div>
+      <div class="toggle-row">
+        <label class="change-toggle" id="tog-unit"><input type="checkbox" onchange="toggleField('unit',this.checked)"><span class="toggle-dot"></span> Unit</label>
+        <label class="change-toggle" id="tog-movein"><input type="checkbox" onchange="toggleField('movein',this.checked)"><span class="toggle-dot"></span> Move-in date</label>
+        <label class="change-toggle" id="tog-moveout"><input type="checkbox" onchange="toggleField('moveout',this.checked)"><span class="toggle-dot"></span> Move-out date</label>
+        <label class="change-toggle" id="tog-rent"><input type="checkbox" onchange="toggleField('rent',this.checked)"><span class="toggle-dot"></span> Rent</label>
+        <label class="change-toggle" id="tog-concession"><input type="checkbox" onchange="toggleField('concession',this.checked)"><span class="toggle-dot"></span> Concession</label>
+      </div>
+      <div class="change-fields-area" id="change-fields">
+        <div class="empty-hint">👆 tap something above!</div>
+      </div>
+    </div>
+
+    <div class="card card-blue">
+      <div class="section-label"><span class="section-icon">📝</span> Additional Info</div>
+      <div class="row-2">
+        <div class="field">
+          <label class="field-label">New lease generated?</label>
+          <select class="field-select" id="f-newlease">
+            <option value="yes">Yes ✓</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Reason / Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">(optional)</span></label>
+          <input class="field-input" type="text" id="f-notes" placeholder="e.g. Applicant requested unit transfer" />
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <button class="btn-primary" id="submit-btn" onclick="submitEntry()">✨ Log Amendment</button>
+      <button class="btn-secondary" onclick="resetForm()">Clear</button>
+      <span id="status-msg" style="font-size:13px;margin-left:4px;font-family:var(--font-doodle)"></span>
+    </div>
+
+  </div>
+
+  <div class="view" id="view-history">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <input class="field-input" type="text" id="search-input" placeholder="🔍 Search applicant..." oninput="filterHistory()" style="max-width:240px" />
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="field-select" id="filter-property" onchange="filterHistory()" style="min-width:160px">
+          <option value="">All Properties</option>
+          <option>Flow Brickell</option><option>Flow Miami West</option>
+          <option>Flow Miami East</option><option>Flow Fort Lauderdale</option><option>Flow Wynwood</option>
+        </select>
+        <a href="https://docs.google.com/document/d/1PxRWjS9ipyjAO7AHipwdq3yUT-emMp7bFS7p-UV7p94/edit" target="_blank" class="btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap">
+          📄 Open Doc
+        </a>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Applicant</th><th>Property</th><th>Changes</th><th>New Lease</th><th>Logged by</th></tr></thead>
+        <tbody id="history-tbody"><tr><td colspan="6" class="empty-table">no amendments yet! 🌸</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var activeFields={},allEntries=[],activeRow=null;
+
+async function autoFill(){
+  var text=document.getElementById('ai-paste').value.trim();
+  if(!text){showToast('Paste something first!','error');return;}
+  var btn=document.getElementById('ai-btn'),status=document.getElementById('ai-status');
+  btn.disabled=true;btn.textContent='thinking...';
+  status.className='ai-status loading';status.textContent='✨ Reading your message...';
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:'You extract lease amendment details from messages. Respond ONLY with a valid JSON object, no markdown, no explanation. The JSON must have these keys:\n- applicant: string (full name, or "" if not found)\n- property: string (one of: "Flow Brickell","Flow Miami West","Flow Miami East","Flow Fort Lauderdale","Flow Wynwood", or "" if not found)\n- notes: string (reason or extra context, or "")\n- changes: array of objects with keys: key (one of: unit,movein,moveout,rent,concession), before (string or ""), after (string or "")\n\nFor dates use MM/DD/YYYY format. For rent include the $ sign. Only include changes that are explicitly mentioned.',
+        messages:[{role:'user',content:'Extract lease amendment details from this message:\n\n'+text}]
+      })
+    });
+    var data=await res.json();
+    var raw=data.content.filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    var clean=raw.replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(clean);
+
+    // Fill applicant
+    if(parsed.applicant) document.getElementById('f-applicant').value=parsed.applicant;
+    // Fill property
+    if(parsed.property){
+      var sel=document.getElementById('f-property');
+      for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===parsed.property){sel.selectedIndex=i;break;}}
+    }
+    // Fill notes
+    if(parsed.notes) document.getElementById('f-notes').value=parsed.notes;
+    // Fill changes
+    if(parsed.changes&&parsed.changes.length){
+      parsed.changes.forEach(function(c){
+        if(!fieldConfig[c.key]) return;
+        activeFields[c.key]=true;
+        var tog=document.getElementById('tog-'+c.key);
+        if(tog){tog.classList.add('active');tog.querySelector('input').checked=true;}
+      });
+      renderChangeFields();
+      parsed.changes.forEach(function(c){
+        var bef=document.getElementById('cf-'+c.key+'-before'),aft=document.getElementById('cf-'+c.key+'-after');
+        if(bef&&c.before) bef.value=c.before;
+        if(aft&&c.after) aft.value=c.after;
+      });
+    }
+    status.className='ai-status done';status.textContent='✓ Fields filled! Review and submit.';
+  }catch(e){
+    status.className='ai-status err';status.textContent='Hmm, couldn\'t read that. Try rephrasing.';
+  }
+  btn.disabled=false;btn.textContent='✨ Auto-fill';
+}
+function clearPaste(){
+  document.getElementById('ai-paste').value='';
+  document.getElementById('ai-status').textContent='';
+  document.getElementById('ai-status').className='ai-status';
+}
+var PROP_CLASSES={'Flow Brickell':'prop-brickell','Flow Miami West':'prop-west','Flow Miami East':'prop-east','Flow Fort Lauderdale':'prop-ftl','Flow Wynwood':'prop-wynwood'};
+var fieldConfig={
+  unit:{label:'Unit',type:'text',ph:['e.g. 1204','e.g. 1508']},
+  movein:{label:'Move-in date',type:'date',ph:['','']},
+  moveout:{label:'Move-out date',type:'date',ph:['','']},
+  rent:{label:'Rent',type:'text',ph:['e.g. $2,800','e.g. $3,000']},
+  concession:{label:'Concession',type:'text',ph:['e.g. 1 month free','e.g. $500 off']}
+};
+(function(){ try{allEntries=JSON.parse(localStorage.getItem('leaseAmendments')||'[]');}catch(e){allEntries=[];} })();
+function saveEntries(){ try{localStorage.setItem('leaseAmendments',JSON.stringify(allEntries));}catch(e){} }
+function showView(name){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='history') renderHistoryTable(allEntries);
+}
+function toggleField(key,checked){
+  var tog=document.getElementById('tog-'+key);
+  if(checked){tog.classList.add('active');activeFields[key]=true;}
+  else{tog.classList.remove('active');delete activeFields[key];}
+  renderChangeFields();
+}
+function renderChangeFields(){
+  var area=document.getElementById('change-fields'),keys=Object.keys(activeFields);
+  if(!keys.length){area.innerHTML='<div class="empty-hint">👆 tap something above!</div>';return;}
+  area.innerHTML=keys.map(function(key){
+    var cfg=fieldConfig[key];
+    return '<div class="change-row"><span class="change-label-text">'+cfg.label+'</span><input class="change-input" type="'+cfg.type+'" id="cf-'+key+'-before" placeholder="'+cfg.ph[0]+'"><span class="arrow-cell">→</span><input class="change-input" type="'+cfg.type+'" id="cf-'+key+'-after" placeholder="'+cfg.ph[1]+'"></div>';
+  }).join('');
+}
+function submitEntry(){
+  var property=document.getElementById('f-property').value,logger=document.getElementById('f-logger').value.trim(),applicant=document.getElementById('f-applicant').value.trim(),newLease=document.getElementById('f-newlease').value==='yes',notes=document.getElementById('f-notes').value.trim();
+  if(!property){showToast('Pick a property! 🏠','error');return;}
+  if(!logger){showToast('Who are you? ✏️','error');return;}
+  if(!applicant){showToast('Enter applicant name!','error');return;}
+  if(!Object.keys(activeFields).length){showToast('What changed? Pick one!','error');return;}
+  var changes=[];
+  Object.keys(activeFields).forEach(function(key){
+    var before=(document.getElementById('cf-'+key+'-before')||{}).value||'',after=(document.getElementById('cf-'+key+'-after')||{}).value||'';
+    changes.push({key:key,label:fieldConfig[key].label,before:before,after:after});
+  });
+  var entry={id:Date.now(),date:new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'2-digit',timeZone:'America/New_York'}),isoDate:new Date().toISOString(),property:property,logger:logger,applicant:applicant,changes:changes,newLease:newLease,notes:notes};
+  allEntries.unshift(entry);saveEntries();
+  var lines=[entry.date+' | '+logger+' | '+property+' | '+applicant];
+  changes.forEach(function(c){lines.push('  \u2022 '+c.label+': '+(c.before||'\u2014')+' \u2192 '+(c.after||'\u2014'));});
+  if(newLease) lines.push('  \u2022 New lease generated');
+  if(notes) lines.push('  \u2022 Notes: '+notes);
+  var btn=document.getElementById('submit-btn');btn.disabled=true;btn.textContent='Saving...';
+  fetch('https://script.google.com/a/macros/flow.life/s/AKfycbxqavd9MlRBZNqdjjP6n6sPtennXDyDLjxCqt-SQzmJphejdAOGXT-l6yWFDRDJoKDL/exec',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'appendAmendment',text:lines.join('\n'),month:new Date().toLocaleDateString('en-US',{month:'long',year:'numeric',timeZone:'America/New_York'}).toUpperCase()})
+  }).then(function(r){return r.json();}).then(function(data){
+    btn.disabled=false;btn.textContent='✨ Log Amendment';
+    if(data.error){showToast('Saved locally — doc sync failed','error');}else{showToast('Logged! 💗','success');resetForm();}
+  }).catch(function(){btn.disabled=false;btn.textContent='✨ Log Amendment';showToast('Saved locally!','error');resetForm();});
+}
+function resetForm(){
+  ['f-property','f-logger','f-applicant','f-notes'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('f-newlease').value='yes';
+  document.getElementById('status-msg').textContent='';
+  document.getElementById('submit-btn').disabled=false;document.getElementById('submit-btn').textContent='✨ Log Amendment';
+  activeFields={};
+  document.querySelectorAll('.change-toggle').forEach(function(t){t.classList.remove('active');t.querySelector('input').checked=false;});
+  renderChangeFields();
+}
+function filterHistory(){
+  var search=document.getElementById('search-input').value.toLowerCase(),prop=document.getElementById('filter-property').value;
+  renderHistoryTable(allEntries.filter(function(e){return(!search||e.applicant.toLowerCase().includes(search))&&(!prop||e.property===prop);}));
+}
+function renderHistoryTable(entries){
+  var tbody=document.getElementById('history-tbody');
+  if(!entries.length){tbody.innerHTML='<tr><td colspan="6" class="empty-table">no amendments yet! 🌸</td></tr>';return;}
+  tbody.innerHTML=entries.map(function(e){
+    var propCls=PROP_CLASSES[e.property]||'prop-brickell',changeLabels=e.changes.map(function(c){return c.label;}).join(', ');
+    var leaseBadge=e.newLease?'<span style="background:var(--green-light);color:#1a6e35;border:2px solid var(--green);border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;font-family:var(--font-doodle)">Yes ✓</span>':'<span style="color:var(--text-light);font-size:12px">No</span>';
+    return '<tr onclick="openDetail(\''+e.id+'\')" data-id="'+e.id+'"><td class="td-muted">'+escHtml(e.date)+'</td><td style="font-weight:700">'+escHtml(e.applicant)+'</td><td><span class="prop-pill '+propCls+'">'+escHtml(e.property)+'</span></td><td class="td-muted">'+escHtml(changeLabels)+'</td><td>'+leaseBadge+'</td><td class="td-muted">'+escHtml(e.logger)+'</td></tr>';
+  }).join('');
+}
+function openDetail(id){
+  var row=document.querySelector('tr[data-id="'+id+'"]');if(!row)return;
+  if(activeRow&&activeRow.dataset.id===String(id)){closeDetail();return;}
+  closeDetail();activeRow=row;row.classList.add('selected-row');
+  var entry=allEntries.find(function(e){return String(e.id)===String(id);});if(!entry)return;
+  var changesHtml=entry.changes.map(function(c){return '<div class="log-change-row"><span class="log-change-label">'+escHtml(c.label)+'</span><span class="log-before">'+escHtml(c.before||'—')+'</span><span class="log-arrow">→</span><span class="log-after">'+escHtml(c.after||'—')+'</span></div>';}).join('');
+  var innerHtml='<div class="accordion-inner"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div class="log-entry-name">💗 '+escHtml(entry.applicant)+'</div><button style="background:none;border:2px solid var(--text-dark);border-radius:8px;font-size:16px;color:var(--text-dark);cursor:pointer;line-height:1;padding:2px 8px;font-family:var(--font-doodle)" onclick="closeDetail()">✕</button></div>'+changesHtml+(entry.newLease?'<div class="log-new-lease">✓ New lease generated</div>':'')+(entry.notes?'<div class="log-notes-line">'+escHtml(entry.notes)+'</div>':'')+'</div>';
+  var accordionRow=document.createElement('tr');accordionRow.className='accordion-row';
+  var td=document.createElement('td');td.colSpan=6;td.innerHTML=innerHtml;
+  accordionRow.appendChild(td);row.parentNode.insertBefore(accordionRow,row.nextSibling);
+}
+function closeDetail(){var existing=document.querySelector('.accordion-row');if(existing)existing.remove();if(activeRow){activeRow.classList.remove('selected-row');activeRow=null;}}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast toast-'+(type||'success')+' show';setTimeout(function(){t.classList.remove('show');},3500);}
+window.addEventListener('load',function(){if(window.location.hash==='#history')showView('history');});
+</script>
+</body>
+</html>
